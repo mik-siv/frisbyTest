@@ -26,5 +26,12 @@ describe('todos crud', function () {
     it('Create a new todo', async () => {
         await frisby.post(helper.genEndpoint('todos'), payload)
             .inspectResponse()
+            .expect('jsonTypes', 'data', {
+                id: helper.validateNumber(),
+                user_id: helper.validateString(payload.user_id),
+                title: helper.validateString(payload.title),
+                due_on: helper.validateString(payload.due_on),
+                status: helper.validateString(payload.status)
+            })
     })
 })
