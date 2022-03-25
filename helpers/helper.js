@@ -7,6 +7,17 @@ class helper {
     #token = '4c0639b1709407fbc215081b15f0df4ca1c3d292872b350c3753f512f9ca0a21';
     apiUrl = 'https://gorest.co.in/public/v1/';
 
+    setUpToken(token){
+        frisby.globalSetup({
+            request: {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json',
+                }
+            }
+        })
+    }
+
     sleep(ms = 1000) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -52,6 +63,12 @@ class helper {
             return Joi.object(obj).required()
         } else {
             return Joi.object().required()
+        }
+    }
+
+    validateData = (data, baseline)=>{
+        for (const key in baseline) {
+            Joi.assert(data[key], this.validateString(baseline[key]))
         }
     }
 }

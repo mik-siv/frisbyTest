@@ -5,6 +5,14 @@ let pagesCount;
 let defaultPageNum = 1;
 let pageLimit = 20;
 
+let baseLine = {
+    id: null,
+    name: null,
+    email: null,
+    gender: null,
+    status: null
+}
+
 describe('User endpoint schema checks', () => {
 
     it('Get schema meta data', async () => {
@@ -39,9 +47,11 @@ describe('User endpoint schema checks', () => {
                 gender: helper.validateString(),
                 status: helper.validateString()
             })
+            .then(res=>{
+                helper.validateData(res.json.data, baseLine)
+            })
         }
     });
-
 });
 
 

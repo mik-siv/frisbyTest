@@ -1,5 +1,6 @@
 const frisby = require('frisby');
 const helper = require('../helpers/helper.js');
+const user = require('../helpers/components/user.js')
 const userData = {
     name: helper.genName(),
     email: helper.genEmail(),
@@ -10,50 +11,17 @@ let userId;
 
 
 describe('User CRUD', () => {
-    beforeAll(
-        () => {
-            frisby.globalSetup({
-                request: {
-                    headers: {
-                        'Authorization': 'Bearer ' + helper.token,
-                        'Content-Type': 'application/json',
-                    }
-                }
-            })
-        }
-    );
+    beforeAll(() => {
+        helper.setUpToken(helper.token)
+    });
 
 
     it('POST new user', async () => {
-        await frisby.post(helper.genEndpoint('users'), {
-            id: null,
-            name: userData.name,
-            email: userData.email,
-            gender: userData.gender,
-            status: userData.status
-        })
-            .expect('status', 201)
-            .expect('jsonTypes', 'data', {
-                id: helper.validateNumber(),
-                name: helper.validateString(userData.name),
-                email: helper.validateString(userData.email),
-                gender: helper.validateString(userData.gender),
-                status: helper.validateString(userData.status)
-            }).then(res => {
-                userId = res.json.data.id;
-            })
+        userId = await user.postUser(userData);
     });
 
     it('GET created user', async () => {
-        await frisby.get(`${helper.genEndpoint('users')}/${userId}`)
-            .expect('status', 200)
-            .expect('jsonTypes', 'data', {
-                id: helper.validateNumber(userId),
-                name: helper.validateString(userData.name),
-                email: helper.validateString(userData.email),
-                gender: helper.validateString(userData.gender),
-                status: helper.validateString(userData.status)
-            })
+        await user.getUser(userId, userData);
     });
 
     it('PATCH existing user', async () => {
@@ -62,20 +30,7 @@ describe('User CRUD', () => {
         userData.gender = 'female';
         userData.status = 'inactive';
 
-        await frisby.patch(`${helper.genEndpoint('users')}/${userId}`, {
-            name: userData.name,
-            email: userData.email,
-            gender: userData.gender,
-            status: userData.status
-        })
-            .expect('status', 200)
-            .expect('jsonTypes', 'data', {
-                id: helper.validateNumber(),
-                name: helper.validateString(userData.name),
-                email: helper.validateString(userData.email),
-                gender: helper.validateString(userData.gender),
-                status: helper.validateString(userData.status)
-            })
+        await user.patchUser(userId, userData)
     });
 
     it('DELETE existing user', async () => {
@@ -85,6 +40,11 @@ describe('User CRUD', () => {
 
     it('GET deleted user', async () => {
         await frisby.get(`${helper.genEndpoint('users')}/${userId}`)
+            .expect('status', 404)
+    });
+
+    it('PATCH deleted user', async () => {
+        await frisby.patch(`${helper.genEndpoint('users')}/${userId}`, userData)
             .expect('status', 404)
     });
 });
